@@ -1,31 +1,23 @@
 #!/usr/bin/python3
-"""Initialize flask functions"""
-from flask import jsonify, make_response
+"""status of the  Flask api application"""
+
 from api.v1.views import app_views
 from models import storage
-
-classes = {"Amenity": "amenities",
-           "City": "cities",
-           "Place": "places",
-           "Review": "reviews",
-           "State": "states",
-           "User": "users"}
+from flask import jsonify
 
 
-@app_views.route('/status', strict_slashes=False)
-def view_status():
-    """Returns a JSON"""
-    response = jsonify({"status": "OK"})
-    response.headers["Content-Type"] = "application/json"
-    return response
+@app_views.route('/status', methods=['GET'])
+def ok_status():
+    """Return status OK in route"""
+    return jsonify({"status": "OK"})
 
 
-@app_views.route('/stats', strict_slashes=False)
-def storage_stats():
-    """Returns a JSON"""
-    dict = {}
-    for cls, name in classes.items():
-        dict.update({name: storage.count(cls)})
-    response = jsonify(dict)
-    response.headers["Content-Type"] = "application/json"
-    return response
+@app_views.route('/stats')
+def stats():
+    """Return status OK in route"""
+    from models.engine.db_storage import classes
+    json_res = dict()
+    print(sorted(classes))
+    for key in sorted(classes):
+        json_res[classes[key].__tablename__] = storage.count(classes[key])
+    return jsonify(json_res), 200
