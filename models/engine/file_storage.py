@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Contains the FileStorage class
+class FileStorage
 """
 
 import json
@@ -40,11 +40,25 @@ class FileStorage:
             key = obj.__class__.__name__ + "." + obj.id
             self.__objects[key] = obj
 
+    def get(self, cls, id):
+        """get an object by its class and ID"""
+        class_name = None
+        for key, value in classes.items():
+            if cls == value or cls == value.__name__:
+                class_name = value.__name__
+        if not class_name:
+            return None
+        return self.__objects.get("{}.{}".format(class_name, id))
+
+    def count(self, cls=None):
+        """Return count of passed class"""
+        return len(self.all(cls))
+
     def save(self):
         """serializes __objects to the JSON file (path: __file_path)"""
         json_objects = {}
         for key in self.__objects:
-            json_objects[key] = self.__objects[key].to_dict()
+            json_objects[key] = self.__objects[key].to_dict('file_storage')
         with open(self.__file_path, 'w') as f:
             json.dump(json_objects, f)
 
@@ -68,19 +82,3 @@ class FileStorage:
     def close(self):
         """call reload() method for deserializing the JSON file to objects"""
         self.reload()
-
-    def get(self, cls, id):
-        """retrieve one object
-        """
-        objects = list(self.all(cls).values())
-        for object in objects:
-            if object.id == id:
-                return (object)
-
-    def count(self, cls=None):
-        """count the number of objects in storage"""
-        objects = self.all(cls)
-        number = 0
-        for object in objects:
-            number += 1
-        return (number)
