@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Place Endpoints for the API
+Place the API
 """
 
 from api.v1.views import app_views
