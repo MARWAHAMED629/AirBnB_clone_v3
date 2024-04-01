@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-City Endpoints for the API
+City the API
 """
 
 from api.v1.views import app_views
