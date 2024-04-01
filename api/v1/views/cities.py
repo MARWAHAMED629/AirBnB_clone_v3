@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Cities API
+City Endpoints for the API
 """
 
 from api.v1.views import app_views
@@ -12,7 +12,7 @@ from flask import abort, request, jsonify
 
 @app_views.route('/states/<state_id>/cities', methods=['GET', 'POST'])
 def cities(state_id):
-    """Return status OK for status the route"""
+    """Return status OK for status route"""
     state = storage.get(State, state_id)
     if not state:
         abort(404)
@@ -36,7 +36,7 @@ def cities(state_id):
 
 @app_views.route('/cities/<city_id>', methods=['GET', 'PUT', 'DELETE'])
 def city_id(city_id):
-    """Return status OK for status the route"""
+    """Return status OK for status route"""
     city = storage.get(City, city_id)
     if not city:
         abort(404)
