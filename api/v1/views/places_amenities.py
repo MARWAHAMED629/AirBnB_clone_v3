@@ -1,88 +1,46 @@
 #!/usr/bin/python3
 """
-View for Reviews that handles all RESTful API.
+review Endpoints for the API
 """
 
-from flask import jsonify, request, abort
-from models import storage
-from models.review import Review
 from api.v1.views import app_views
+from models import storage
+from models.place import Place
+from models.amenity import Amenity
+from flask import abort, request, jsonify
 
 
-@app_views.route('/places/<place_id>/reviews', methods=['GET'],
-                 strict_slashes=False)
-def reviews_all(place_id):
-    """ returns list of all Review objects """
-    place = storage.get("Place", place_id)
-    if place is None:
+@app_views.route('/places/<place_id>/amenities', methods=['GET'])
+def place_amenities(place_id):
+    """Return status OK for status route"""
+    place = storage.get(Place, place_id)
+    if not place:
         abort(404)
-    reviews_all = []
-    reviews = storage.all("Review").values()
-    for review in reviews:
-        if review.place_id == place_id:
-            reviews_all.append(review.to_json())
-    return jsonify(reviews_all)
+    amenities = []
+    for amenity in place.amenities:
+        amenities.append(amenity.to_dict())
+    return jsonify(amenities), 200
 
 
-@app_views.route('/reviews/<review_id>', methods=['GET'])
-def review_get(review_id):
-    """ handles GET method """
-    review = storage.get("Review", review_id)
-    if review is None:
+@app_views.route('places/<place_id>/amenities/<amenity_id>',
+                 methods=['POST', 'DELETE'])
+def place_amenity_id(place_id, amenity_id):
+    """Return status OK for status route"""
+    place = storage.get(Place, place_id)
+    if not place:
         abort(404)
-    review = review.to_json()
-    return jsonify(review)
-
-
-@app_views.route('/reviews/<review_id>', methods=['DELETE'])
-def review_delete(review_id):
-    """ handles DELETE method """
-    empty_dict = {}
-    review = storage.get("Review", review_id)
-    if review is None:
+    amenity = storage.get(Amenity, amenity_id)
+    if not amenity:
         abort(404)
-    storage.delete(review)
-    storage.save()
-    return jsonify(empty_dict), 200
-
-
-@app_views.route('/places/<place_id>/reviews', methods=['POST'],
-                 strict_slashes=False)
-def review_post(place_id):
-    """ handles POST method """
-    place = storage.get("Place", place_id)
-    if place is None:
-        abort(404)
-    data = request.get_json()
-    if data is None:
-        abort(400, "Not a JSON")
-    if 'user_id' not in data:
-        abort(400, "Missing user_id")
-    user = storage.get("User", data['user_id'])
-    if user is None:
-        abort(404)
-    if 'text' not in data:
-        abort(400, "Missing text")
-    review = Review(**data)
-    review.place_id = place_id
-    review.save()
-    review = review.to_json()
-    return jsonify(review), 201
-
-
-@app_views.route('/reviews/<review_id>', methods=['PUT'])
-def review_put(review_id):
-    """ handles PUT method """
-    review = storage.get("Review", review_id)
-    if review is None:
-        abort(404)
-    data = request.get_json()
-    if data is None:
-        abort(400, "Not a JSON")
-    for key, value in data.items():
-        ignore_keys = ["id", "user_id", "place_id", "created_at", "updated_at"]
-        if key not in ignore_keys:
-            review.bm_update(key, value)
-    review.save()
-    review = review.to_json()
-    return jsonify(review), 200
+    if request.method == 'POST':
+        if amenity in place.amenities:
+            return jsonify(amenity.to_dict()), 200
+        place.amenities.append(amenity)
+        storage.save()
+        return jsonify(amenity.to_dict()), 201
+    if request.method == "DELETE":
+        if amenity not in place.amenities:
+            abort(404)
+        place.amenities.remove(amenity)
+        storage.save()
+        return jsonify({}), 200
