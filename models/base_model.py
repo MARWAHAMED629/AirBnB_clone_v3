@@ -10,6 +10,10 @@ import sqlalchemy
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
+<<<<<<< HEAD
+=======
+from hashlib import md5
+>>>>>>> e56c0be3cb236f4e008a46784f036884691339a2
 
 time = "%Y-%m-%dT%H:%M:%S.%f"
 
@@ -68,6 +72,11 @@ class BaseModel:
         new_dict["__class__"] = self.__class__.__name__
         if "_sa_instance_state" in new_dict:
             del new_dict["_sa_instance_state"]
+<<<<<<< HEAD
+=======
+        if getenv("HBNB_TYPE_STORAGE") == "db" and "password" in new_dict:
+            del new_dict["password"]
+>>>>>>> e56c0be3cb236f4e008a46784f036884691339a2
         return new_dict
 
     def delete(self):
