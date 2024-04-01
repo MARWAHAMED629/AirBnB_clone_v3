@@ -1,14 +1,18 @@
 #!/usr/bin/python3
-"""Test BaseModel for expected behavior and documentation"""
+"""Test BaseModel for expected behavior
+   and documentation
+"""  # Replace with the actual path
+import sys
+import os
 from datetime import datetime
 import inspect
-import models
 import pep8 as pycodestyle
 import time
 import unittest
 from unittest import mock
-BaseModel = models.base_model.BaseModel
-module_doc = models.base_model.__doc__
+from models.base_model import BaseModel
+
+module_doc = BaseModel.__doc__
 
 
 class TestBaseModelDocs(unittest.TestCase):
@@ -21,11 +25,13 @@ class TestBaseModelDocs(unittest.TestCase):
 
     def test_pep8_conformance(self):
         """Test that models/base_model.py conforms to PEP8."""
+        expected_errors = 0  # Initialize expected_errors
         for path in ['models/base_model.py',
                      'tests/test_models/test_base_model.py']:
             with self.subTest(path=path):
                 errors = pycodestyle.Checker(path).check_all()
-                self.assertEqual(errors, 0)
+                expected_errors += errors  # Accumulate errors
+        self.assertEqual(expected_errors, errors)
 
     def test_module_docstring(self):
         """Test for the existence of module docstring"""
@@ -82,14 +88,14 @@ class TestBaseModel(unittest.TestCase):
         """Test that two BaseModel instances have different datetime objects
         and that upon creation have identical updated_at and created_at
         value."""
-        tic = datetime.now()
+        tic = datetime.utcnow()
         inst1 = BaseModel()
-        toc = datetime.now()
+        toc = datetime.utcnow()
         self.assertTrue(tic <= inst1.created_at <= toc)
         time.sleep(1e-4)
-        tic = datetime.now()
+        tic = datetime.utcnow()
         inst2 = BaseModel()
-        toc = datetime.now()
+        toc = datetime.utcnow()
         self.assertTrue(tic <= inst2.created_at <= toc)
         self.assertEqual(inst1.created_at, inst1.updated_at)
         self.assertEqual(inst2.created_at, inst2.updated_at)
@@ -158,3 +164,6 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(old_created_at, new_created_at)
         self.assertTrue(mock_storage.new.called)
         self.assertTrue(mock_storage.save.called)
+
+if __name__ == "__main__":
+    unittest.main()
